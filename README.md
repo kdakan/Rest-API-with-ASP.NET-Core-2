@@ -27,7 +27,7 @@
 The correct REST status codes and payloads are listed as follows:
 - GET without an id returns:
 - 200 Ok with the collection data in the payload, whether the collection data is empty or not
-```
+```cs
 [HttpGet]
 public async Task<ActionResult<IEnumerable<Models.Movie>>> GetMovies()
 {
@@ -38,7 +38,7 @@ public async Task<ActionResult<IEnumerable<Models.Movie>>> GetMovies()
 - GET with an id returns:
 - 200 OK with the data in the payload on success, 
 - 404 Not Found if the resource does not exist
-```
+```cs
 [HttpGet("{movieId}", Name = "GetMovie")]
 public async Task<ActionResult<Models.Movie>> GetMovie(Guid movieId)
 {
@@ -55,7 +55,7 @@ public async Task<ActionResult<Models.Movie>> GetMovie(Guid movieId)
 - 201 Created with the URI to the newly created resource in the payload on success, 
 - 400 Bad Request if the input payload is empty, 
 - 422 Unprocessable Entity with the validation errors in the payload if there are validation errors
-```
+```cs
 [HttpPost]
 public async Task<IActionResult> CreateMovie(
     [FromBody] Models.MovieForCreation movieForCreation)
@@ -91,7 +91,7 @@ public async Task<IActionResult> CreateMovie(
 - 400 Bad Request if the input payload is empty, 
 - 422 Unprocessable Entity with the validation errors in the payload if there are validation errors,
 - 404 Not Found if the resource does not exist
-```
+```cs
 [HttpPut("{movieId}")]
 public async Task<IActionResult> UpdateMovie(Guid movieId, 
     [FromBody] Models.MovieForUpdate movieForUpdate)
@@ -134,7 +134,7 @@ public async Task<IActionResult> UpdateMovie(Guid movieId,
 - 200 with the data in the payload on success,
 - 422 Unprocessable Entity with the validation errors in the payload if there are validation errors,
 - 404 Not Found if the resource does not exist
-```
+```cs
 [HttpPatch("{movieId}")]
 public async Task<IActionResult> PartiallyUpdateMovie(Guid movieId, 
     [FromBody] JsonPatchDocument<Models.MovieForUpdate> patchDoc)
@@ -173,7 +173,7 @@ public async Task<IActionResult> PartiallyUpdateMovie(Guid movieId,
 - DELETE returns:
 - 204 No Content with an empty payload on success,
 - 404 Not Found if the resource does not exist
-```
+```cs
 [HttpDelete("{movieid}")]
 public async Task<IActionResult> DeleteMovie(Guid movieId)
 {
