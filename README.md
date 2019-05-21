@@ -87,7 +87,7 @@ public async Task<IActionResult> CreateMovie(
 }
 ```
 - PUT returns:
-- 200 OK with the data in the payload on success, 
+- 200 OK with either the data in the payload, or empty payload on success, 
 - 400 Bad Request if the input payload is empty, 
 - 422 Unprocessable Entity with the validation errors in the payload if there are validation errors,
 - 404 Not Found if the resource does not exist
@@ -131,7 +131,7 @@ public async Task<IActionResult> UpdateMovie(Guid movieId,
 }
 ```
 - PATCH returns:
-- 200 with the data in the payload on success,
+- 200 with either the data in the payload, or empty payload on success,
 - 422 Unprocessable Entity with the validation errors in the payload if there are validation errors,
 - 404 Not Found if the resource does not exist
 ```cs
