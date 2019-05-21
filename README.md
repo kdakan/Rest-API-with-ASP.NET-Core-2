@@ -192,8 +192,14 @@ public async Task<IActionResult> DeleteMovie(Guid movieId)
 - These also apply to actions involving child resources, but additionally, it should return 404 Not Found if the parent resource does not exist.
 - For example, actions on a URI like cities/1/districts or cities/1/districts/1, will return 404 Not Found if the city with id 1 does not exist.
 
+## Global error handling:
+- In Development environment, we can show the detailed exception page on any uncatched exception, by using UseDeveloperExceptionPage() inside the Startup class Configure() method
+- In other environments, we can return 500 Server Error with a generic explanation, by using UseExceptionHandler() inside the Startup class Configure() method, we can also handle logging here
+- This way, there is no need to use try/catch blocks to catch exceptions inside action methods and return 500 Server Error in each catch block
+
 ## Content negotiation:
 - We can add output formatters at the Startup class ConfigureServices() method to support different response (returned output) media types determined by the accept header
+- We can return 406 Not Acceptable for an accept header that we do not support, by using ReturnHttpNotAcceptable() at the Startup class ConfigureServices() method
 - We can add input formatters at the Startup class ConfigureServices() method to support different request (parameter input) media types determined by the content-type header
 - JSON formatters come already added by default, so it supports JSON input and output, unless the formatter is removed
 
