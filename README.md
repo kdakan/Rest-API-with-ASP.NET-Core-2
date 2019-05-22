@@ -1,14 +1,14 @@
 # REST API WITH ASP.NET CORE 2
 
 ## Table of contents
-* [ 1. ASP.NET Core](#1-asp-net-core)
+* [ 1. ASP.NET Core](#1-aspnet-core)
 * [ 2. MVC](#2-mvc)
 * [ 3. HTTP status code levels](#3-http-status-code-levels)
 * [ 4. HTTP actions and proper responses](#4-http-actions-and-proper-responses)
 * [ 5. Global error handling](#5-global-error-handling)
 * [ 6. Logging with NLog](#6-logging-with-nlog)
 * [ 7. Content negotiation](#7-content-negotiation)
-* [ 8. IOC & dependency injection](#8-ioc-and-dependency-injection)
+* [ 8. IOC and dependency injection](#8-ioc-and-dependency-injection)
 * [ 9. Configuration files and environment variables](#9-configuration-files-and-environment-variables)
 * [ 10. Entity Framework Core 2](#10-entity-framework-core-2)
 * [ 11. DTO's and AutoMapper](#11-dtos-and-automapper)
