@@ -210,10 +210,10 @@ public async Task<IActionResult> DeleteMovie(Guid movieId)
 }
 ```
 - These also apply to actions involving child resources, but additionally, it should return 404 Not Found if the parent resource does not exist.
-- For example, actions on a URI like cities/1/districts or cities/1/districts/1, will return 404 Not Found if the city with id 1 does not exist.
+- For example, actions on a URI like cities/1/districts or cities/1/districts/1 will return 404 Not Found if the city with id 1 does not exist.
 
 ## 5. Global error handling:
-- In Development environment, we can show the detailed exception page on any uncatched exception, by using UseDeveloperExceptionPage() inside the Startup class Configure() method
+- In the Development environment, we can show the detailed exception page on any uncatched exception, by using UseDeveloperExceptionPage() inside the Startup class Configure() method
 - In other environments, we can return 500 Server Error with a generic explanation, by using UseExceptionHandler() inside the Startup class Configure() method, we can also handle logging here
 - This way, there is no need to use try/catch blocks to catch exceptions inside action methods and return 500 Server Error in each catch block
 - Inside UseExceptionHandler(), we can log these global errors (see next section, "Logging with NLog")
@@ -306,7 +306,7 @@ else
 - We also need to be able to reverse the order on some fields, like sorting by Age field of a DTO can actually mean sorting by DateOfBirth field (column) of an entity model, but in descending order
 - To cover this scenario, we can build a property mapper class which maps a DTO field to multiple entity fields, and optionally reverses the sorting order
 - To be able to sort using string field names, we should use the System.Linq.Dynamic.Core package
-- Using this package, we can use OrderBy(someString), where the "someString" parameter can hold comma separated column names and even "ascending" or "descending" appended to the end, to specify the sorting order
+- Using this package, we can use OrderBy(someString), where the "someString" parameter can hold comma-separated column names and even "ascending" or "descending" appended to the end, to specify the sorting order
 
 ## 14. HTTP cache:
 Static web pages, images, or static data like definitions, cities, countries, currencies, etc. can be served from an HTTP cache to reduce network traffic or reduce server load on the API. 
@@ -341,7 +341,7 @@ HTTP cache validation:
 - Only if the resource has changed at the server, the API will serve new data with a new Cache-Control header and a new ETag header, to be cached at the cache again
 
 ## 17. Using HTTP cache and concurrency control:
-- We can use the Marvin.Cache.Headers package to support HTTP cache headers with ETags, and the ASP.NET Core ResponseCaching package in an ASP.NET Core application (CacheCow.Server and CacheCow.Client packages can only be used for older ASP.NET applications, not in ASP.NET Core applications)
+- We can use Marvin.Cache.Headers package to support HTTP cache headers with ETags, and the ASP.NET Core ResponseCaching package in an ASP.NET Core application (CacheCow.Server and CacheCow.Client packages can only be used for older ASP.NET applications, not in ASP.NET Core applications)
 - We can use UseHttpCacheHeaders() (before UseMVC()) inside the Startup class Configure() method, and AddHttpCacheHeaders() inside the Startup class ConfigureServices() method to support HTTP cache headers, and also provide options like the max-age seconds inside AddHttpCacheHraders()
 - We can use UseResponseCaching() (before UseHttpCacheHeaders()) inside the Startup class Configure() method, and AddResponseCaching() inside the Startup class ConfigureServices() method to support an HTTP cache store, so that our application remembers cached responses and does not serve new data and new headers on each request
 - This way, we also have an optimistic locking mechanism, a conflicting update (PUT request with an older version ETag value in its request header) will fail and receive the HTTP status code 412 Precondition Failed response from the API
