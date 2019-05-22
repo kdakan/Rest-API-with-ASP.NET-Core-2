@@ -1,4 +1,4 @@
-# BUILDING AN API WITH ASP.NET CORE 2
+# REST API WITH ASP.NET CORE 2
 
 - ASP.NET Core can run on both the full .NET framework and the .NET Core framework (.NET Standard is not a framework, it is a standard which the frameworks comply with)
 - ASP.NET Core can run on both Windows and Linux, but the full .NET framework does not support Linux
@@ -196,7 +196,42 @@ public async Task<IActionResult> DeleteMovie(Guid movieId)
 - In Development environment, we can show the detailed exception page on any uncatched exception, by using UseDeveloperExceptionPage() inside the Startup class Configure() method
 - In other environments, we can return 500 Server Error with a generic explanation, by using UseExceptionHandler() inside the Startup class Configure() method, we can also handle logging here
 - This way, there is no need to use try/catch blocks to catch exceptions inside action methods and return 500 Server Error in each catch block
+- Inside UseExceptionHandler(), we can log these global errors (see next section, "Logging with NLog")
 
+## Logging with NLog:
+- We add the NLog package, and add NLog in the Startup class Configure() method, using AddNLog()
+- We can even use AddNLog() earlier, in Program class of the hosting console application, to log things during the hosting process
+- We also configure with the nlog.config file, where and at which level (Debug, Error, Fatal, Info, Trace, Warn, etc.) it will create the logs
+- To use the logger in MyController, we inject "ILogger<MyController> logger" in the constructor of MyController, and use logger.LogInformation() or other logger methods to log information
+- Inside UseExceptionHandler() in the Startup class Configure() method, we can give a lambda parameter to do things when an error occurs. To log global errors inside this lambda parameter, we can use 
+```cs
+if (env.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler(appBuilder =>
+    {
+        appBuilder.Run(async context =>
+        {
+            var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+            if (exceptionHandlerFeature != null)
+            {
+                var logger = loggerFactory.CreateLogger("Global exception logger");
+                logger.LogError(500,
+                    exceptionHandlerFeature.Error,
+                    exceptionHandlerFeature.Error.Message);
+            }
+
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsync("An unexpected fault happened. Try again later.");
+
+        });                      
+    });
+}
+```
+    
 ## Content negotiation:
 - We can add output formatters at the Startup class ConfigureServices() method to support different response (returned output) media types determined by the accept header
 - We can return 406 Not Acceptable for an accept header that we do not support, by using ReturnHttpNotAcceptable() at the Startup class ConfigureServices() method
@@ -210,10 +245,6 @@ public async Task<IActionResult> DeleteMovie(Guid movieId)
 - AddScoped() uses per request lifetime (uses the same instance during an HTTP request)
 - AddSingleton() uses application lifetime (always uses the same static instance)
 - AddTransient() re-instantiates the dependency each time it is requested (injected), this is recommended for stateless lightweight dependencies
-
-## Logging with NLog:
-- We add the NLog package, and add NLog in the Startup class Configure() method, using AddNLog()
-- We also configure with the nlog.config file, where and at which level (Debug, Error, Fatal, Info, Trace, Warn, etc.) it will create the logs
 
 ## Configuration files & environment variables:
 - We can use the appSettings.json file to store and access configuration information
