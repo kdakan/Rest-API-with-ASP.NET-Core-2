@@ -14,7 +14,10 @@
 * [11. DTO's and AutoMapper](#11-dtos-and-automapper)
 * [12. Paging and Filtering Resources](#12-paging-and-filtering-resources)
 * [13. Sorting resources on DTO fields](#13-sorting-resources-on-dto-fields)
-* [14. HTTP cache and concurrency control](#14-http-cache-and-concurrency-control)
+* [14. HTTP cache](#14-http-cache)
+* [15. HTTP cache expiration and validation](#15-http-cache-expiration-and-validation)
+* [16. Example HTTP cache flow](#16-example-http-cache-flow)
+* [17. Using HTTP cache and concurrency control](#17-using-http-cache-and-concurrency-control)
 
 ## 1. ASP.NET Core
 - ASP.NET Core can run on both the full .NET framework and the .NET Core framework (.NET Standard is not a framework, it is a standard which the frameworks comply with)
@@ -306,16 +309,39 @@ else
 - Using this package, we can use OrderBy(someString), where the "someString" parameter can hold comma separated column names and even "ascending" or "descending" appended to the end, to specify the sorting order
 
 ## 14. HTTP cache:
+Static web pages, images, or static data like definitions, cities, countries, currencies, etc. can be served from an HTTP cache to reduce network traffic or reduce server load on the API. 
+
 There are three types of HTTP cache:
 - Client cache is a private cache that lives on the client, like localstorage in the web browser or a private cache in a mobile app
 - Gateway cache (or reverse proxy or HTTP accelerator) is a shared cache that lives on the server
 - Proxy cache is a shared cache that lives on the network
 - There may be all three of them on none in a given system
 
-There are two models which govern how the HTTP cache works:
-- Expiration model
-- Validation model
+## 15. HTTP cache expiration and validation:
+HTTP cache integrates both expiration and validation to reduce network traffic between clients and the API
 
-## 15. Using HTTP cache and concurrency control:
-- 
--
+HTTP cache expiration:
+- Uses the Expires header or the Cache-Control header
+- Expires header is not recommended because it uses a timestamp and thus the client and the server clocks should be synchronized, also the client has no control
+- Cache-Control header is recommended, it uses max-age to determine how many seconds the API response should be cached, whether the data can be cached in a private or shared cache (with the public and private keywords in the response header), and the client can request data with less max-age data using the same header in the request
+- The client can also use no-cache in its Cache-Control request header if it needs to bypass HTTP caching and always hit the API (this is also used when testing an API)
+- Similarly, the API can use no-cache in its Cache-Control response header if it doesn't want the response being cached in an HTTP cache
+
+HTTP cache validation:
+- Is used by the cache to determine if the cached data is stale (changed), and needs to be updated from the server
+- Uses the ETag header to determine if the response body or header has changed
+- The Etag value (like a hash value) indicates a specific version of a resource, and thus can be used as an optimistic lock mechanism for concurrent updates
+
+## 16. Example HTTP cache flow:
+- When a client requests a URI for the first time, the cache is empty and the API responds with the data and the Cache-Control header having max-age like 1800 seconds (30 minutes), and the Etag header having a value like 12345678
+- When the same client (or a different client in the case of a shared/public cache) requests the same URI after 10 minutes, the cache responds with the same data and the Cache-Control header having max-age 1800 seconds (30 minutes) and age 600 seconds (10 minutes), and the Etag header having the same value 12345678, without ever hitting the API
+- When a client requests the same URI after an hour, since the cache is already expired, the cache sends the request to the API with the Cache-Control header having If-Non-Match the same value 12345678
+- If the resource has not changed at the server, the API responds with the status code 304 Not Modified, with no payload, so that the cache can respond to the client with the same data and with the same ETag header having value 12345678
+- When a client requests the same URI again and if the resource has not changed at the server, the same thing will happen
+- Only if the resource has changed at the server, the API will serve new data with a new Cache-Control header and a new ETag header, to be cached at the cache again
+
+## 17. Using HTTP cache and concurrency control:
+- We can use the Marvin.Cache.Headers package to support HTTP cache headers with ETags, and the ASP.NET Core ResponseCaching package in an ASP.NET Core application (CacheCow.Server and CacheCow.Client packages can only be used for older ASP.NET applications, not in ASP.NET Core applications)
+- We can use UseHttpCacheHeaders() (before UseMVC()) inside the Startup class Configure() method, and AddHttpCacheHeaders() inside the Startup class ConfigureServices() method to support HTTP cache headers, and also provide options like the max-age seconds inside AddHttpCacheHraders()
+- We can use UseResponseCaching() (before UseHttpCacheHeaders()) inside the Startup class Configure() method, and AddResponseCaching() inside the Startup class ConfigureServices() method to support an HTTP cache store, so that our application remembers cached responses and does not serve new data and new headers on each request
+- This way, we also have an optimistic locking mechanism, a conflicting update (PUT request with an older version ETag value in its request header) will fail and receive the HTTP status code 412 Precondition Failed response from the API
