@@ -18,12 +18,12 @@
 - We can put parameters in curly braces inside the route URI, which will also be passed to the action method as parameters
 - We should return the correct HTTP status code and payload in an action method
 
-## HTTP status codes:
+## Levels of HTTP status codes:
 - Level 200 status codes mean success, like 200 OK, 201 Created, 204 No Content
 - Level 400 status codes mean client error, like 400 Bad Request, 401 Unauthorized (user is not authorized), 403 Forbidden (user is authorized but lacks permission), 404 Not Found, 409 Conflict (conflicting updates)
 - Level 500 status codes mean server error, like 500 Internal Server Error
 
-## HTTP status codes and payload for each action:
+## HTTP actions, status codes & response payloads:
 The correct REST status codes and payloads are listed as follows:
 - GET without an id returns:
 - 200 Ok with the collection data in the payload, whether the collection data is empty or not
