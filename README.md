@@ -10,8 +10,11 @@
 * [ 7. Content negotiation](#7-content-negotiation)
 * [ 8. IOC and dependency injection](#8-ioc-and-dependency-injection)
 * [ 9. Configuration files and environment variables](#9-configuration-files-and-environment-variables)
-* [ 10. Entity Framework Core 2](#10-entity-framework-core-2)
-* [ 11. DTO's and AutoMapper](#11-dtos-and-automapper)
+* [10. Entity Framework Core 2](#10-entity-framework-core-2)
+* [11. DTO's and AutoMapper](#11-dtos-and-automapper)
+* [12. Paging and Filtering Resources](#12-paging-and-filtering-resources)
+* [13. Sorting resources on DTO fields](#13-sorting-resources-on-dto-fields)
+* [14. HTTP cache and concurrency control](#14-http-cache-and-concurrency-control)
 
 ## 1. ASP.NET Core
 - ASP.NET Core can run on both the full .NET framework and the .NET Core framework (.NET Standard is not a framework, it is a standard which the frameworks comply with)
@@ -279,12 +282,40 @@ else
 - We can use Database.EnsureCreated() in our DB context constructor to create the DB if it does not exist
 - We can also use Database.Migrate() in our DB context constructor to run DB migrations if they exist
 - EF Core 2 uses the __EFMigrationHistory table to track which migrations have been applied to the database
-- On the package manager console, we can use the Add-Migration to create a new migration class with Up() and Down() methods, and use the Update-Database command to apply pending migrations to the DB
+- On the package manager console, we can use the add-migration to create a new migration class with Up() and Down() methods, and use the update-database command to apply pending migrations to the DB
 - We can insert seed data in Startup class Configure() method, if we want to do so
 - It is advisable to use the repository pattern, with methods returning IEnumerable for collections, instead of directly working with DB context in the action methods
 
 ## 11. DTO's and AutoMapper:
+- DTO (Data Transfer Object) is the name given for a model class that is specifically designed to transfer data between the clients and the service
+- A DTO model doesn't have to be shaped after the entity model, it can lack some fields from the entity model, it can have computed fields, it can even be a summary model that stores data coming from multiple entities
 - It is advisable to use DTO model classes for API input and output, which are different than the entity model classes, and map data between these classes, either manually or with AutoMapper
 - We can use Mapper.Initialize() and also configure mappings using CreateMap() inside the Startup class Configure() method
 - Default configuration maps fields with the same name to each other and ignores null values, and is enough for most of the time
 - We can use Mapper.Map() to map data from one class to another
+
+## 12. Paging and filtering resources:
+- Paging and filtering can be supported by using query parameters on top of the regular GET URI for the collection resource, like /people?name=John&pageNumber=2&pageSize=10
+- We can use Skip() and Take() methods on the IQueryable interface of the DbSet to get the paged data we need
+
+## 13. Sorting resources on DTO fields:
+- We need to be able to sort on fields on DTO's that don't exist on the entity models, like sorting on a computed Name field of the PersonDTO class, instead of FirstName and LastName fields (columns) on the Person entity
+- We also need to be able to reverse the order on some fields, like sorting by Age field of a DTO can actually mean sorting by DateOfBirth field (column) of an entity model, but in descending order
+- To cover this scenario, we can build a property mapper class which maps a DTO field to multiple entity fields, and optionally reverses the sorting order
+- To be able to sort using string field names, we should use the System.Linq.Dynamic.Core package
+- Using this package, we can use OrderBy(someString), where the "someString" parameter can hold comma separated column names and even "ascending" or "descending" appended to the end, to specify the sorting order
+
+## 14. HTTP cache:
+There are three types of HTTP cache:
+- Client cache is a private cache that lives on the client, like localstorage in the web browser or a private cache in a mobile app
+- Gateway cache (or reverse proxy or HTTP accelerator) is a shared cache that lives on the server
+- Proxy cache is a shared cache that lives on the network
+- There may be all three of them on none in a given system
+
+There are two models which govern how the HTTP cache works:
+- Expiration model
+- Validation model
+
+## 15. Using HTTP cache and concurrency control:
+- 
+-
