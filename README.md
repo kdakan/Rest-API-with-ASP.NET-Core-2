@@ -1,4 +1,4 @@
-# REST API WITH ASP.NET CORE 2
+# REST API'S WITH ASP.NET CORE 2 & EF CORE 2
 
 ## Table of contents
 * [ 1. ASP.NET Core](#1-aspnet-core)
