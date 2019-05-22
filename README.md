@@ -1,5 +1,19 @@
 # REST API WITH ASP.NET CORE 2
 
+## Table of contents
+* [ 1. ASP.NET Core](#1-asp-net-core)
+* [ 2. MVC](#2-mvc)
+* [ 3. HTTP status code levels](#3-http-status-code-levels)
+* [ 4. HTTP actions and proper responses](#4-http-actions-and-proper-responses)
+* [ 5. Global error handling](#5-global-error-handling)
+* [ 6. Logging with NLog](#6-logging-with-nlog)
+* [ 7. Content negotiation](#7-content-negotiation)
+* [ 8. IOC & dependency injection](#8-ioc-and-dependency-injection)
+* [ 9. Configuration files and environment variables](#9-configuration-files-and-environment-variables)
+* [ 10. Entity Framework Core 2](#10-entity-framework-core-2)
+* [ 11. DTO's and AutoMapper](#11-dtos-and-automapper)
+
+## 1. ASP.NET Core
 - ASP.NET Core can run on both the full .NET framework and the .NET Core framework (.NET Standard is not a framework, it is a standard which the frameworks comply with)
 - ASP.NET Core can run on both Windows and Linux, but the full .NET framework does not support Linux
 - Inside the Startup class ConfigureServices() method, we wire up the dependency injection system, by adding dependencies to the IOC container
@@ -8,7 +22,7 @@
 - Environments are independent of Debug/Release build configuration settings
 - If we change the environment, we should restart the web server (Kestrel, IIS, Apache, etc.) for the changes to take effect
 
-## MVC:
+## 2. MVC:
 - MVC middleware covers both MVC (Razor views) and WebAPI (Web services) applications
 - Microsoft.AspNetCore.All is a meta-package that includes ASP.NET Core packages, including MVC, Authentication, EF Core, and others
 - Runtime Store is a special common folder on the machine where the packages in the meta-packages sit, and where they can be shared by all apps
@@ -18,12 +32,12 @@
 - We can put parameters in curly braces inside the route URI, which will also be passed to the action method as parameters
 - We should return the correct HTTP status code and payload in an action method
 
-## Levels of HTTP status codes:
+## 3. HTTP status code levels:
 - Level 200 status codes mean success, like 200 OK, 201 Created, 204 No Content
 - Level 400 status codes mean client error, like 400 Bad Request, 401 Unauthorized (user is not authorized), 403 Forbidden (user is authorized but lacks permission), 404 Not Found, 409 Conflict (conflicting updates)
 - Level 500 status codes mean server error, like 500 Internal Server Error
 
-## HTTP actions, status codes & response payloads:
+## 4. HTTP actions and proper responses:
 The correct REST status codes and payloads are listed as follows:
 - GET without an id returns:
 - 200 Ok with the collection data in the payload, whether the collection data is empty or not
@@ -192,18 +206,19 @@ public async Task<IActionResult> DeleteMovie(Guid movieId)
 - These also apply to actions involving child resources, but additionally, it should return 404 Not Found if the parent resource does not exist.
 - For example, actions on a URI like cities/1/districts or cities/1/districts/1, will return 404 Not Found if the city with id 1 does not exist.
 
-## Global error handling:
+## 5. Global error handling:
 - In Development environment, we can show the detailed exception page on any uncatched exception, by using UseDeveloperExceptionPage() inside the Startup class Configure() method
 - In other environments, we can return 500 Server Error with a generic explanation, by using UseExceptionHandler() inside the Startup class Configure() method, we can also handle logging here
 - This way, there is no need to use try/catch blocks to catch exceptions inside action methods and return 500 Server Error in each catch block
 - Inside UseExceptionHandler(), we can log these global errors (see next section, "Logging with NLog")
 
-## Logging with NLog:
+## 6. Logging with NLog:
 - We add the NLog package, and add NLog in the Startup class Configure() method, using AddNLog()
 - We can even use AddNLog() earlier, in Program class of the hosting console application, to log things during the hosting process
 - We also configure with the nlog.config file, where and at which level (Debug, Error, Fatal, Info, Trace, Warn, etc.) it will create the logs
 - To use the logger in MyController, we inject "ILogger<MyController> logger" in the constructor of MyController, and use logger.LogInformation() or other logger methods to log information
 - Inside UseExceptionHandler() in the Startup class Configure() method, we can give a lambda parameter to do things when an error occurs. To log global errors inside this lambda parameter, we can use 
+
 ```cs
 if (env.IsDevelopment())
 {
@@ -232,13 +247,13 @@ else
 }
 ```
     
-## Content negotiation:
+## 7. Content negotiation:
 - We can add output formatters at the Startup class ConfigureServices() method to support different response (returned output) media types determined by the accept header
 - We can return 406 Not Acceptable for an accept header that we do not support, by using ReturnHttpNotAcceptable() at the Startup class ConfigureServices() method
 - We can add input formatters at the Startup class ConfigureServices() method to support different request (parameter input) media types determined by the content-type header
 - JSON formatters come already added by default, so it supports JSON input and output, unless the formatter is removed
 
-## IOC & Dependency injection:
+## 8. IOC and dependency injection:
 - IOC container and constructor injection is supported by default
 - It is advised to use constructor injection, but we can also use HttpContext.RequestServices.GetService() to get an instance from the IOC container
 - We add and configure the lifetime of our dependencies in the Startup class ConfigureServices() method
@@ -246,7 +261,7 @@ else
 - AddSingleton() uses application lifetime (always uses the same static instance)
 - AddTransient() re-instantiates the dependency each time it is requested (injected), this is recommended for stateless lightweight dependencies
 
-## Configuration files & environment variables:
+## 9. Configuration files and environment variables:
 - We can use the appSettings.json file to store and access configuration information
 - We can also scope this file for different environments, by naming the file like appSettings.Production.json
 - The scoped file, when running in that environment, overrides the regular appSettings.json file
@@ -254,7 +269,7 @@ else
 - It is advisable to store secrets such as connection strings or API keys in environment variables, instead of in appSettings files
 - We can also define an environment variable and assign it a value in the launchSettings.json file inside Visual Studio, for development purposes only
 
-## Entity Framework Core 2:
+## 10. Entity Framework Core 2:
 - EF Core 2 works similar to EF 6, but with some features missing and some with slight changes
 - We can use the same naming convention or data annotations as in EF 6, to define primary keys, foreign keys, child collection, and navigational fields
 - We define DbSet table mapping in our DbContext derived custom DB context class, and add it as a scoped dependency using AddDbContext() in Startup class ConfigureServices() method
@@ -268,7 +283,7 @@ else
 - We can insert seed data in Startup class Configure() method, if we want to do so
 - It is advisable to use the repository pattern, with methods returning IEnumerable for collections, instead of directly working with DB context in the action methods
 
-## DTO's & AutoMapper:
+## 11. DTO's and AutoMapper:
 - It is advisable to use DTO model classes for API input and output, which are different than the entity model classes, and map data between these classes, either manually or with AutoMapper
 - We can use Mapper.Initialize() and also configure mappings using CreateMap() inside the Startup class Configure() method
 - Default configuration maps fields with the same name to each other and ignores null values, and is enough for most of the time
