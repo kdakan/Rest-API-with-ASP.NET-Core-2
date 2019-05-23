@@ -33,7 +33,7 @@
 - Microsoft.AspNetCore.All is a meta-package that includes ASP.NET Core packages, including MVC, Authentication, EF Core, and others
 - Runtime Store is a special common folder on the machine where the packages in the meta-packages sit, and where they can be shared by all apps
 - In ASP.NET Core 2, packages in the Runtime Store folder are not copied to the output folder of the app by default, and need to be deployed separately
-- We can define a convention based routing in app.UseMVC() or use attribute based routing on controllers or action methods, which is the recommended way for API's (using ApiController attribute on the controller, forces us to use attribute based routing)
+- We can define a convention based routing in app.UseMVC() or use attribute based routing on controllers or action methods, which is the recommended way for API's (using ApiController attribute on the controller, forces us to use attribute-based routing)
 - Route attribute works at the controller level, HttpGet, HttpPost, HttpPut, HttpPatch, and HttpDelete attributes work at the action level, and they all accept a string URI parameter to define the routes
 - We can put parameters in curly braces inside the route URI, which will also be passed to the action method as parameters
 - We should return the correct HTTP status code and payload in an action method
@@ -44,9 +44,9 @@
 - Level 500 status codes mean server error, like 500 Internal Server Error
 
 ## 4. HTTP actions and proper responses:
-The correct HTTP status codes and payloads for a REST API, is listed as follows:
+The correct HTTP status codes and payloads for a REST API are listed as follows:
 - GET without an id returns:
-- 200 Ok with the collection data in the payload, whether the collection data is empty or not
+- 200 Ok with the data collection in the payload, whether the collection data is empty or not
 ```cs
 [HttpGet]
 public async Task<ActionResult<IEnumerable<Models.Movie>>> GetMovies()
@@ -98,8 +98,7 @@ public async Task<IActionResult> CreateMovie(
     // save the changes
     await _moviesRepository.SaveChangesAsync();
 
-    // Fetch the movie from the data store so the director is included
-    await _moviesRepository.GetMovieAsync(movieEntity.Id);
+    // Fetch the movie from the data store so the director is included await _moviesRepository.GetMovieAsync(movieEntity.Id);
 
     return CreatedAtRoute("GetMovie",
         new { movieId = movieEntity.Id },
@@ -294,16 +293,16 @@ else
 - A DTO model doesn't have to be shaped after the entity model, it can lack some fields from the entity model, it can have computed fields, it can even be a summary model that stores data coming from multiple entities
 - It is advisable to use DTO model classes for API input and output, which are different than the entity model classes, and map data between these classes, either manually or with AutoMapper
 - We can use Mapper.Initialize() to add AutoMapper and also configure the mappings using CreateMap() inside the Startup class Configure() method
-- Default configuration for AutoMapper, maps between fields with the same name and ignores missing fields, and is enough for most of the time
+- The default configuration for AutoMapper, maps between fields with the same name and ignores missing fields, and is enough for most of the time
 - We can use Mapper.Map() to map data from one class to another with AutoMapper
 
 ## 12. Async actions:
 - Using async/await in IO bound operations (file system, database, network, etc.) scales better, because this way, the thread handling the current request is not blocked during such async operations, is returned to the thread pool, and can be reused for handling other concurrent requests
 - It is not advisable to use async/await in CPU bound operations
-- async methods are not executed directly, instead, the compiler generates a state machine that begins executing it and than returns back to the caller and recursively back to the top main() method and then back to the thread pool, and then continue execution when the IO bound operation unblocks at the OS level
+- async methods are not executed directly, instead, the compiler generates a state machine that begins executing it and then returns back to the caller and recursively back to the top main() method and then back to the thread pool, and then continue execution when the IO bound operation unblocks at the OS level
 - Async keyword used in a method declaration, means await operations can be used inside this method
 - An async method that does not have any await operation executes sequentially as normal methods do, without the compiler generated state machine
-- An async method can return void (not recommended), Task (with no return value), or Task<T> (with return value of type T), state of execution is tracked in the Task object
+- An async method can return void (not recommended), Task (with no return value), or Task<T> (with a return value of type T), state of execution is tracked in the Task object
 - in C# 7, an async method can return any class that has a GetAwaiter() method, this allows for value types allowed to be returned from async methods (value types are stored on the stack whereas Task, a reference type, is stored on the heap memory, which needs garbage collection for cleaning up)
 - Async methods have names ending with "Async" by convention
 - Async keyword is not used inside an interface, it is only used inside a class
@@ -323,7 +322,7 @@ else
 Static web pages, images, or static data like definitions, cities, countries, currencies, etc. can be served from an HTTP cache to reduce network traffic or reduce server load on the API. 
 
 There are three types of HTTP cache:
-- Client cache is a private cache that lives on the client, like localstorage in the web browser or a private cache in a mobile app
+- Client cache is a private cache that lives on the client, like local storage in the web browser or a private cache in a mobile app
 - Gateway cache (or reverse proxy or HTTP accelerator) is a shared cache that lives on the server
 - Proxy cache is a shared cache that lives on the network
 - There may be all three of them on none in a given system
