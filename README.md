@@ -12,8 +12,8 @@
 * [ 9. Configuration files and environment variables](#9-configuration-files-and-environment-variables)
 * [10. Entity Framework Core 2](#10-entity-framework-core-2)
 * [11. DTO's and AutoMapper](#11-dtos-and-automapper)
-* [12. Paging and Filtering Resources](#12-paging-and-filtering-resources)
-* [13. Sorting resources on DTO fields](#13-sorting-resources-on-dto-fields)
+* [12. Async actions](#12-async-actions)
+* [13. Paging, Filtering and Sorting Resources](#13-paging-filtering-and-sorting-resources)
 * [14. HTTP cache](#14-http-cache)
 * [15. HTTP cache expiration and validation](#15-http-cache-expiration-and-validation)
 * [16. Example HTTP cache flow](#16-example-http-cache-flow)
@@ -297,7 +297,7 @@ else
 - Default configuration for AutoMapper, maps between fields with the same name and ignores missing fields, and is enough for most of the time
 - We can use Mapper.Map() to map data from one class to another with AutoMapper
 
-## 13. Async/await pattern:
+## 12. Async actions:
 - Using async/await in IO bound operations (file system, database, network, etc.) scales better, because this way, the thread handling the current request is not blocked during such async operations, is returned to the thread pool, and can be reused for handling other concurrent requests
 - It is not advisable to use async/await in CPU bound operations
 - async methods are not executed directly, instead, the compiler generates a state machine that begins executing it and than returns back to the caller and recursively back to the top main() method and then back to the thread pool, and then continue execution when the IO bound operation unblocks at the OS level
@@ -310,18 +310,16 @@ else
 - Action methods, and even the main() method can be async
 - We can use the async ToListAsync() method on the DbSet, and the async SaveChangesAsync() method on the DbContext, instead of the synchronous ToList() and SaveChanges() methods
 
-## 12. Paging and filtering resources:
+## 13. Paging, filtering, and sorting resources:
 - Paging and filtering can be supported by using query parameters on top of the regular GET URI for the collection resource, like /people?name=John&pageNumber=2&pageSize=10
 - We can use Skip() and Take() methods on the IQueryable interface of the DbSet to get the paged data we need
-
-## 13. Sorting resources on DTO fields:
 - We need to be able to sort on fields on DTO's that don't exist on the entity models, like sorting on a computed Name field of the PersonDTO class, instead of FirstName and LastName fields (columns) on the Person entity
 - We also need to be able to reverse the order on some fields, like sorting by Age field of a DTO can actually mean sorting by DateOfBirth field (column) of an entity model, but in descending order
 - To cover this scenario, we can build a property mapper class which maps a DTO field to multiple entity fields, and optionally reverses the sorting order
 - To be able to sort using string field names, we should use the System.Linq.Dynamic.Core package
 - Using this package, we can use OrderBy(someString), where the "someString" parameter can hold comma-separated column names and even "ascending" or "descending" appended to the end, to specify the sorting order
 
-## 14. HTTP cache:
+## 15. HTTP cache:
 Static web pages, images, or static data like definitions, cities, countries, currencies, etc. can be served from an HTTP cache to reduce network traffic or reduce server load on the API. 
 
 There are three types of HTTP cache:
@@ -330,7 +328,7 @@ There are three types of HTTP cache:
 - Proxy cache is a shared cache that lives on the network
 - There may be all three of them on none in a given system
 
-## 15. HTTP cache expiration and validation:
+## 16. HTTP cache expiration and validation:
 HTTP cache integrates both expiration and validation to reduce network traffic between clients and the API
 
 HTTP cache expiration:
@@ -345,7 +343,7 @@ HTTP cache validation:
 - Uses the ETag header to determine if the response body or header has changed
 - The Etag value (like a hash value) indicates a specific version of a resource, and thus can be used as an optimistic lock mechanism for concurrent updates
 
-## 16. Example HTTP cache flow:
+## 17. Example HTTP cache flow:
 - When a client requests a URI for the first time, the cache is empty and the API responds with the data and the Cache-Control header having max-age like 1800 seconds (30 minutes), and the Etag header having a value like 12345678
 - When the same client (or a different client in the case of a shared/public cache) requests the same URI after 10 minutes, the cache responds with the same data and the Cache-Control header having max-age 1800 seconds (30 minutes) and age 600 seconds (10 minutes), and the Etag header having the same value 12345678, without ever hitting the API
 - When a client requests the same URI after an hour, since the cache is already expired, the cache sends the request to the API with the Cache-Control header having If-Non-Match the same value 12345678
@@ -353,7 +351,7 @@ HTTP cache validation:
 - When a client requests the same URI again and if the resource has not changed at the server, the same thing will happen
 - Only if the resource has changed at the server, the API will serve new data with a new Cache-Control header and a new ETag header, to be cached at the cache again
 
-## 17. Using HTTP cache and concurrency control:
+## 18. Using HTTP cache and concurrency control:
 - We can use Marvin.Cache.Headers package to support HTTP cache headers with ETags, and the ASP.NET Core ResponseCaching package in an ASP.NET Core application (CacheCow.Server and CacheCow.Client packages can only be used for older ASP.NET applications, not in ASP.NET Core applications)
 - We can use UseHttpCacheHeaders() (before UseMVC()) inside the Startup class Configure() method, and AddHttpCacheHeaders() inside the Startup class ConfigureServices() method to support HTTP cache headers, and also provide options like the max-age seconds inside AddHttpCacheHraders()
 - We can use UseResponseCaching() (before UseHttpCacheHeaders()) inside the Startup class Configure() method, and AddResponseCaching() inside the Startup class ConfigureServices() method to support an HTTP cache store, so that our application remembers cached responses and does not serve new data and new headers on each request
