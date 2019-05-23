@@ -1,4 +1,4 @@
-[https://kdakan.github.io/REST-API-WITH-ASP.NET-CORE-2-EF-CORE-2/](https://kdakan.github.io/REST-API-WITH-ASP.NET-CORE-2-EF-CORE-2/)
+[https://kdakan.github.io/Rest-API-with-ASP.NET-Core-2/](https://kdakan.github.io/Rest-API-with-ASP.NET-Core-2/)
 
 # BUILDING A REST API WITH ASP.NET CORE 2 & EF CORE 2
 
