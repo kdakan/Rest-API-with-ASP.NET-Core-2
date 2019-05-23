@@ -319,7 +319,7 @@ else
 - To be able to sort using string field names, we should use the System.Linq.Dynamic.Core package
 - Using this package, we can use OrderBy(someString), where the "someString" parameter can hold comma-separated column names and even "ascending" or "descending" appended to the end, to specify the sorting order
 
-## 15. HTTP cache:
+## 14. HTTP cache:
 Static web pages, images, or static data like definitions, cities, countries, currencies, etc. can be served from an HTTP cache to reduce network traffic or reduce server load on the API. 
 
 There are three types of HTTP cache:
@@ -328,7 +328,7 @@ There are three types of HTTP cache:
 - Proxy cache is a shared cache that lives on the network
 - There may be all three of them on none in a given system
 
-## 16. HTTP cache expiration and validation:
+## 15. HTTP cache expiration and validation:
 HTTP cache integrates both expiration and validation to reduce network traffic between clients and the API
 
 HTTP cache expiration:
@@ -343,7 +343,7 @@ HTTP cache validation:
 - Uses the ETag header to determine if the response body or header has changed
 - The Etag value (like a hash value) indicates a specific version of a resource, and thus can be used as an optimistic lock mechanism for concurrent updates
 
-## 17. Example HTTP cache flow:
+## 16. Example HTTP cache flow:
 - When a client requests a URI for the first time, the cache is empty and the API responds with the data and the Cache-Control header having max-age like 1800 seconds (30 minutes), and the Etag header having a value like 12345678
 - When the same client (or a different client in the case of a shared/public cache) requests the same URI after 10 minutes, the cache responds with the same data and the Cache-Control header having max-age 1800 seconds (30 minutes) and age 600 seconds (10 minutes), and the Etag header having the same value 12345678, without ever hitting the API
 - When a client requests the same URI after an hour, since the cache is already expired, the cache sends the request to the API with the Cache-Control header having If-Non-Match the same value 12345678
@@ -351,7 +351,7 @@ HTTP cache validation:
 - When a client requests the same URI again and if the resource has not changed at the server, the same thing will happen
 - Only if the resource has changed at the server, the API will serve new data with a new Cache-Control header and a new ETag header, to be cached at the cache again
 
-## 18. Using HTTP cache and concurrency control:
+## 17. Using HTTP cache and concurrency control:
 - We can use Marvin.Cache.Headers package to support HTTP cache headers with ETags, and the ASP.NET Core ResponseCaching package in an ASP.NET Core application (CacheCow.Server and CacheCow.Client packages can only be used for older ASP.NET applications, not in ASP.NET Core applications)
 - We can use UseHttpCacheHeaders() (before UseMVC()) inside the Startup class Configure() method, and AddHttpCacheHeaders() inside the Startup class ConfigureServices() method to support HTTP cache headers, and also provide options like the max-age seconds inside AddHttpCacheHraders()
 - We can use UseResponseCaching() (before UseHttpCacheHeaders()) inside the Startup class Configure() method, and AddResponseCaching() inside the Startup class ConfigureServices() method to support an HTTP cache store, so that our application remembers cached responses and does not serve new data and new headers on each request
