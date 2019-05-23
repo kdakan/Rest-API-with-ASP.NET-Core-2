@@ -13,7 +13,7 @@
 * [10. Entity Framework Core 2](#10-entity-framework-core-2)
 * [11. DTO's and AutoMapper](#11-dtos-and-automapper)
 * [12. Async actions](#12-async-actions)
-* [13. Paging, Filtering and Sorting Resources](#13-paging-filtering-and-sorting-resources)
+* [13. Paging, filtering and sorting resources](#13-paging-filtering-and-sorting-resources)
 * [14. HTTP cache](#14-http-cache)
 * [15. HTTP cache expiration and validation](#15-http-cache-expiration-and-validation)
 * [16. Example HTTP cache flow](#16-example-http-cache-flow)
