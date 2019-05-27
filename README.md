@@ -20,6 +20,7 @@
 * [15. HTTP cache expiration and validation](#15-http-cache-expiration-and-validation)
 * [16. Example HTTP cache flow](#16-example-http-cache-flow)
 * [17. Using HTTP cache and concurrency control](#17-using-http-cache-and-concurrency-control)
+* [18. Consuming an API with HttpClient](#18-consuming-an-api-with-httpclient)
 
 ## 1. ASP.NET Core
 - ASP.NET Core can run on both the full .NET framework and the .NET Core framework (.NET Standard is not a framework, it is a standard which the frameworks comply with)
@@ -284,12 +285,13 @@ else
 - We can also use manual mapping in OnModelCreating() method of our DbContext based class, and even dismiss using navigational properties, as advised for DDD applications
 - See this link: https://stackoverflow.com/questions/20886049/ef-code-first-foreign-key-without-navigation-property
 - We can use Database.EnsureCreated() in our DB context constructor to create the DB if it does not exist
-- On the package manager console, we can use the add-migration to create a new migration class with Up() and Down() methods, and use the update-database command to apply pending migrations to the DB
+- On the package manager console, we can use the add-migration command to create a new migration class with Up() and Down() methods, and use the update-database command to apply pending migrations to the DB
 - EF Core 2 uses the __EFMigrationHistory table to track which migrations have been applied to the database
 - We can use Database.Migrate() in our DB context constructor to run DB migrations when they exist
 - We can insert seed data in Startup class Configure() method, or alternatively use modelBuilder.Entity<T>.HasData() inside OnModelCreating() method of our DbContext based class
 - It is advisable to use the repository pattern, with methods returning IEnumerable for collections, instead of directly working with DB context in the action methods
-
+- There is no need to call Dispose() on a DB context because we are using constructor injection to instantiate it, and the IOC automatically handles closing connections and disposing the DB context.
+    
 ## 11. DTO's and AutoMapper:
 - DTO (Data Transfer Object) is the name given for a model class that is specifically designed to transfer data between the clients and the service
 - A DTO model doesn't have to be shaped after the entity model, it can lack some fields from the entity model, it can have computed fields, it can even be a summary model that stores data coming from multiple entities
@@ -310,6 +312,17 @@ else
 - Async keyword is not used inside an interface, it is only used inside a class
 - Action methods, and even the main() method can be async
 - We can use the async ToListAsync() method on the DbSet, and the async SaveChangesAsync() method on the DbContext, instead of the synchronous ToList() and SaveChanges() methods
+- To call async methods in parallel, we can use Task.WhenAll() or Task.WhenAny()
+    
+```cs
+var t1 = GetBookAsync(1);
+var t2 = GetBookAsync(2);
+var t3 = GetBookAsync(3);
+
+await Task.WhenAll(t1, t2, t3);
+
+Console.WriteLine(String.Join(", ", t1.Result, t2.Result, t3.Result));
+```
 
 ## 13. Paging, filtering, and sorting resources:
 - Paging and filtering can be supported by using query parameters on top of the regular GET URI for the collection resource, like /people?name=John&pageNumber=2&pageSize=10
@@ -327,7 +340,7 @@ There are three types of HTTP cache:
 - Client cache is a private cache that lives on the client, like local storage in the web browser or a private cache in a mobile app
 - Gateway cache (or reverse proxy or HTTP accelerator) is a shared cache that lives on the server
 - Proxy cache is a shared cache that lives on the network
-- There may be all three of them on none in a given system
+- There may be none, any or all of the three types of cache in a given system
 
 ## 15. HTTP cache expiration and validation:
 HTTP cache integrates both expiration and validation to reduce network traffic between clients and the API
@@ -357,3 +370,50 @@ HTTP cache validation:
 - We can use UseHttpCacheHeaders() (before UseMVC()) inside the Startup class Configure() method, and AddHttpCacheHeaders() inside the Startup class ConfigureServices() method to support HTTP cache headers, and also provide options like the max-age seconds inside AddHttpCacheHraders()
 - We can use UseResponseCaching() (before UseHttpCacheHeaders()) inside the Startup class Configure() method, and AddResponseCaching() inside the Startup class ConfigureServices() method to support an HTTP cache store, so that our application remembers cached responses and does not serve new data and new headers on each request
 - This way, we also have an optimistic locking mechanism, a conflicting update (PUT request with an older version ETag value in its request header) will fail and receive the HTTP status code 412 Precondition Failed response from the API
+
+## 18. Consuming an API with HttpClient:
+- We can use HttpClient to call and cancel calls on API endpoints
+- We can use AddHttpClient() inside the Startup class ConfigureServices() method to enable using HttpClient
+- Each time we want to call an external API, we create an HttpClient instance using CreateClient() on an injected HttpClientFactory object (using new HttpClient() is not recommended because the inner HTTP handlers cannot be reused efficiently on multiple call operations with multiple new HttpClient() initializations)
+- It is advisable to place rest API calls into a repository, same way we use a repository for accessing a resource on the DB. An example repository method for a GET action on an external books.com/api/books/{id} endpoint:
+```cs
+public async Task<Book> GetBookAsync(string id)
+{
+    var httpClient = _httpClientFactory.CreateClient();
+    var response = await httpClient
+           .GetAsync($"http://books.com/api/books/{id}");
+
+    if (response.IsSuccessStatusCode)
+    {
+        return JsonConvert.DeserializeObject<Book>(
+            await response.Content.ReadAsStringAsync());
+    }
+
+    return null;
+}
+```
+- We should try to cancel async tasks when an error occurs, to free up the thread immediately back into the thread pool.
+- We can cancel tasks using a CancellationTokenSource. We inject a CancellationTokenSource instance using constructor injection, and then pass cancellationTokenSource.Token as a token parameter to the httpClient.GetAsync() method call. Later during the async call, we can use token.Cancel() to cancel the async call in case of a failure.
+
+```cs
+private async Task<Book> GetBookAsync(
+HttpClient httpClient, string id, CancellationToken cancellationToken)
+{
+    //throw new Exception("Cannot get book...");
+
+    var response = await httpClient
+               .GetAsync(id, cancellationToken);
+
+    if (response.IsSuccessStatusCode)
+    {
+        var book = JsonConvert.DeserializeObject<Book>(
+            await response.Content.ReadAsStringAsync());
+        return book;
+    }
+
+    _cancellationTokenSource.Cancel();
+
+    return null;
+}
+```
+- We can use try/catch block to catch OperationCancelled Exception to log information about the task which is cancelled
