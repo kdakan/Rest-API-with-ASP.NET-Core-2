@@ -315,13 +315,13 @@ else
 - To call async methods in parallel, we can use Task.WhenAll() or Task.WhenAny()
     
 ```cs
-var t1 = GetBookAsync(1);
-var t2 = GetBookAsync(2);
-var t3 = GetBookAsync(3);
+var task1 = GetBookAsync(1);
+var task2 = GetBookAsync(2);
+var task3 = GetBookAsync(3);
 
-await Task.WhenAll(t1, t2, t3);
+await Task.WhenAll(task1, task2, task3);
 
-Console.WriteLine(String.Join(", ", t1.Result, t2.Result, t3.Result));
+Console.WriteLine(String.Join(", ", task1.Result, task2.Result, task3.Result));
 ```
 
 ## 13. Paging, filtering, and sorting resources:
