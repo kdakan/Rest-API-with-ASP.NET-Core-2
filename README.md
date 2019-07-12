@@ -25,7 +25,7 @@
 ## 1. ASP.NET Core
 - ASP.NET Core can run on both the full .NET framework and the .NET Core framework (.NET Standard is not a framework, it is a standard which the frameworks comply with)
 - ASP.NET Core can run on both Windows and Linux, but the full .NET framework does not support Linux
-- Inside the Startup class ConfigureServices() method, we wire up the dependency injection system, by adding dependencies to the IOC container
+- Inside the Startup class ConfigureServices() method, we wire up the dependency injection system, by adding dependencies to the IOC container, using ```services.AddSingleton<MyService>()``` for a singleton service, ```services.AddScoped<MyService>()``` for a per-request service, and ```services.AddTransient<MyService>()``` for a service that is created new every time it is injected
 - Inside the Startup class Configure() method, we wire up the HTTP request chain, by adding middleware, like MVC, EF, logging, etc.
 - ASP.NET Core supports different environments, Development, Staging, and Production are builtin, but we can add more
 - Environments are independent of Debug/Release build configuration settings
